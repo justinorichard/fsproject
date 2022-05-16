@@ -78,14 +78,23 @@ void *find_tag(struct stivale2_struct *hdr, uint64_t id)
 typedef void *entry_fn_t();
 
 void fs_demo() {
-  kprintf("Open new file new_file.txt");
-  int fd = fs_open("new_file.txt");
-  if (!fs_write(fd, "nihao", 5)) {
+  kprintf("Open a_file.txt\n");
+  int fd1 = fs_open("a_file.txt");
+  kprintf("Open another_file.txt\n");
+  int fd2 = fs_open("another_file.txt");
+
+  kprintf("write 'hello' to a_file\n");
+  if (!fs_write(fd1, "Hello\n", 6)) {
     printf("write failed!\n");
   }
-  fs_append(0, "zx\n", 3);
+  kprintf("write 'nihao' to another_file\n");
+  if (!fs_write(fd2, "nihao\n", 6)) {
+    printf("write failed!\n");
+  }
+  fs_append(fd1, "zx\n", 3);
 
-  fs_read(fd);
+  // 
+  fs_read(fd1);
 }
 
 void _start(struct stivale2_struct *hdr)
