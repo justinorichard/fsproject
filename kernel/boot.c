@@ -84,28 +84,28 @@ void fs_demo() {
   int fd2 = fs_open("f2.txt");
 
   kprintf("\nwrite 'hello' to f1.txt\n");
-  if (!fs_write(fd1, "hello\n", 6)) {
+  if (!fs_write(fd1, "hello", 5)) {
     printf("write failed!\n");
   }
 
   kprintf("\nwrite 'nihao' to f2.txt\n");
-  if (!fs_write(fd2, "nihao\n", 6)) {
+  if (!fs_write(fd2, "nihao", 5)) {
     printf("write failed!\n");
   }
 
   kprintf("\nCurrently Stored in f1.txt: \n");
   fs_read(fd1);
-  kprintf("\nCurrently Stored in f2.txt: \n");
+  kprintf("\n\nCurrently Stored in f2.txt: \n");
   fs_read(fd2);
 
-  kprintf("\nappend ' world' to f1.txt\n");
+  kprintf("\n\nappend ' world' to f1.txt\n");
   fs_append(fd1, " world\n", 7);
   kprintf("\nset first two letters to 'a ' in f2.txt\n");
   fs_write_at(fd2, 0, "a ", 2);
 
   kprintf("\nCurrently Stored in f1.txt: \n");
   fs_read(fd1);
-  kprintf("\nCurrently Stored in f2.txt: \n");
+  kprintf("\n\nCurrently Stored in f2.txt: \n");
   fs_read(fd2);
 
 }
@@ -123,8 +123,7 @@ void _start(struct stivale2_struct *hdr)
   term_init();
 
   // Print a greeting
-  usable_mem(hdr);
-  kprintf("Hello Kernel!\n");
+  // kprintf("Hello Kernel!\n");
   fs_init();
 
   // demo fs
