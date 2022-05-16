@@ -311,7 +311,7 @@ bool vm_map(uintptr_t root, uintptr_t address, bool user, bool writable, bool ex
     // If address already mapped, return
     if (cur_entry->present == 1)
     {
-        kprintf("Address is already mapped");
+        kprintf("Address is already mapped\n");
         return false;
     }
     // fill entry with permissions

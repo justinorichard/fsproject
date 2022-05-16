@@ -13,6 +13,8 @@
 #define SYS_MMAP 9
 #define SYS_EXEC 5
 #define SYS_EXIT 6
+#define SYS_FS_APPEND 12
+#define SYS_FS_READ 13
 
 
 /**
@@ -35,5 +37,7 @@ long SYS_write(int file_descriptor, char *buffer, int length);
 long SYS_mmap(void *addr, size_t length, int prot, int flags,
               int fd, uint64_t offset);
 
-long SYS_exec(char *module);
+long SYS_exec(char *module, const char* argument);
 long SYS_exit();
+long SYS_fs_append(int fd, uint8_t *buf, size_t size);
+long SYS_fs_read(int fd);

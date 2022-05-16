@@ -4,6 +4,7 @@
 
 #define PAGE_SIZE 0x1000
 #define SYS_MMAP 9
+#define SYS_EXEC 5
 
 #define PROT_READ 1
 #define PROT_WRITE 2
@@ -89,4 +90,8 @@ void *malloc(size_t sz)
 void free(void *p)
 {
     // Do nothing
+}
+
+int exec(const char *file_name) { 
+    return syscall(SYS_EXEC, file_name); 
 }

@@ -13,6 +13,8 @@
 #include "gdt.h"
 #include "memory.h"
 #include "modules.h"
+#include "fs.h"
+#include "fd.h"
 
 #define PAGESIZE 0x1000
 
@@ -172,9 +174,14 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
         return SYS_mmap((void *)arg0, (size_t)arg1, (int)arg2, (int)arg3,
                         (int)arg4, (uint64_t)arg5);
     case SYS_EXEC:
-        return SYS_exec((char *)arg0);
+        return SYS_exec((char *)arg0, (char*)arg1);
     case SYS_EXIT:
+        kprintf("test\n");
         return SYS_exit();
+    case SYS_FS_APPEND:
+        return SYS_fs_append((int)arg0, (uint8_t *)arg1, (size_t)arg2);
+    case SYS_FS_READ:
+        return SYS_fs_read((int)arg0);
     }
     return 123;
 }
@@ -236,6 +243,14 @@ long SYS_write(int file_descriptor, char *buffer, int length)
         kprintf("%c", buffer[i]);
     }
     return length;
+}
+
+long SYS_fs_append(int fd, uint8_t *buf, size_t size) {
+    fs_append(fd, buf, size);
+}
+
+long SYS_fs_read(int fd) {
+    fs_read(fd);
 }
 
 // Change the null stuff to where mmap is
@@ -302,8 +317,12 @@ long SYS_mmap(void *addr, size_t length, int prot, int flags,
     return (long)addr;
 }
 
-long SYS_exec(char *module)
+long SYS_exec(char *module, const char* argument)
 {
+    char args[512];
+    if(argument != NULL){
+        strcpy(args, argument);
+    }
 
     char kernel_mod[MOD_BUF_LEN];
     strcpy(kernel_mod, module);
@@ -315,8 +334,19 @@ long SYS_exec(char *module)
 
     entry_fn_t *func = (entry_fn_t *)load_module(hdr_global, kernel_mod);
 
-    func();
-    return 1;
+    uintptr_t user_stack = 0x70000000000;
+    size_t user_stack_size = 8 * 0x1000;
+
+    for (uintptr_t p = user_stack; p < user_stack + user_stack_size; p += 0x1000)
+    {
+        vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, p, true, true, false);
+    }
+    
+    usermode_entry(
+        USER_DATA_SELECTOR | 0x3,
+        user_stack + user_stack_size - 8,
+        USER_CODE_SELECTOR | 0x3,
+        func);
 }
 
 long SYS_exit()
@@ -327,8 +357,19 @@ long SYS_exit()
     mem_start = MMAP_MEM_START;
 
     entry_fn_t *func = (entry_fn_t *)load_module(hdr_global, "init");
-    func();
-    return 1;
+
+    uintptr_t user_stack = 0x70000000000;
+    size_t user_stack_size = 8 * 0x1000;
+    for (uintptr_t p = user_stack; p < user_stack + user_stack_size; p += 0x1000)
+    {
+        vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, p, true, true, false);
+    }
+    
+    usermode_entry(
+        USER_DATA_SELECTOR | 0x3,
+        user_stack + user_stack_size - 8,
+        USER_CODE_SELECTOR | 0x3,
+        func);
 }
 
 // system call stuff ^^^^^^^^^^^^^^^^^^^^^^^^^^

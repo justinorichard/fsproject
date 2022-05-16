@@ -15,6 +15,9 @@
 
 #include "usermode_entry.h"
 
+// headers for demo
+#include "fs.h"
+
 #define PAGESIZE 0x1000
 
 // Reserve space for the stack
@@ -74,6 +77,17 @@ void *find_tag(struct stivale2_struct *hdr, uint64_t id)
 
 typedef void *entry_fn_t();
 
+void fs_demo() {
+  kprintf("Open new file new_file.txt");
+  int fd = fs_open("new_file.txt");
+  if (!fs_write(fd, "nihao", 5)) {
+    printf("write failed!\n");
+  }
+  fs_append(0, "zx\n", 3);
+
+  fs_read(fd);
+}
+
 void _start(struct stivale2_struct *hdr)
 {
   // Setup everything
@@ -87,10 +101,16 @@ void _start(struct stivale2_struct *hdr)
   term_init();
 
   // Print a greeting
+  usable_mem(hdr);
   kprintf("Hello Kernel!\n");
+  fs_init();
+
+  // demo fs
+  fs_demo();
 
   // Pick an arbitrary location and size for the user-mode stack
   uintptr_t user_stack = 0x70000000000;
+  // 70000008000
   size_t user_stack_size = 8 * PAGESIZE;
 
   // Map the user-mode-stack
