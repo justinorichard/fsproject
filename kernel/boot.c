@@ -78,23 +78,36 @@ void *find_tag(struct stivale2_struct *hdr, uint64_t id)
 typedef void *entry_fn_t();
 
 void fs_demo() {
-  kprintf("Open a_file.txt\n");
-  int fd1 = fs_open("a_file.txt");
-  kprintf("Open another_file.txt\n");
-  int fd2 = fs_open("another_file.txt");
+  kprintf("Open f1.txt\n");
+  int fd1 = fs_open("f1.txt");
+  kprintf("Open f2.txt\n");
+  int fd2 = fs_open("f2.txt");
 
-  kprintf("write 'hello' to a_file\n");
-  if (!fs_write(fd1, "Hello\n", 6)) {
+  kprintf("\nwrite 'hello' to f1.txt\n");
+  if (!fs_write(fd1, "hello\n", 6)) {
     printf("write failed!\n");
   }
-  kprintf("write 'nihao' to another_file\n");
+
+  kprintf("\nwrite 'nihao' to f2.txt\n");
   if (!fs_write(fd2, "nihao\n", 6)) {
     printf("write failed!\n");
   }
-  fs_append(fd1, "zx\n", 3);
 
-  // 
+  kprintf("\nCurrently Stored in f1.txt: \n");
   fs_read(fd1);
+  kprintf("\nCurrently Stored in f2.txt: \n");
+  fs_read(fd2);
+
+  kprintf("\nappend ' world' to f1.txt\n");
+  fs_append(fd1, " world\n", 7);
+  kprintf("\nset first two letters to 'a ' in f2.txt\n");
+  fs_write_at(fd2, 0, "a ", 2);
+
+  kprintf("\nCurrently Stored in f1.txt: \n");
+  fs_read(fd1);
+  kprintf("\nCurrently Stored in f2.txt: \n");
+  fs_read(fd2);
+
 }
 
 void _start(struct stivale2_struct *hdr)
