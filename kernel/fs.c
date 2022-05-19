@@ -68,6 +68,8 @@ bool fs_write(int fd, uint8_t *buf, size_t size) { return fs_write_at(fd, 0, buf
 
 bool fs_write_at(int fd, size_t index, uint8_t *buff, size_t size) {
     file_entry_t *entry = find_fd(fd);
+    if(entry == NULL)
+        return false;
     size_t fsize = entry->file_size;
 
     if (index > fsize) {
@@ -132,11 +134,15 @@ bool fs_write_at(int fd, size_t index, uint8_t *buff, size_t size) {
 
 bool fs_append(int fd, uint8_t *buf, size_t size) {
     file_entry_t *entry = find_fd(fd);
+    if(entry == NULL)
+        return false;
     return fs_write_at(fd, entry->file_size, buf, size);
 }
 
 void fs_read(int fd) {
     file_entry_t *entry = find_fd(fd);
+    if(entry == NULL)
+        return;
     size_t total_size = entry->file_size;
     data_block_t *curr_block = &blocks[entry->start_index];
     for (;;) {
@@ -170,6 +176,7 @@ void fs_delete(int fd) {
     strcpy(entry->name, "");
     memset(&entry->start_index, 0, sizeof(uint32_t));
     memset(&entry->file_size, 0, sizeof(size_t));
+    remove_fd(fd);
 }
 
 bool fs_rename(const char *oldpath, const char *newpath) {

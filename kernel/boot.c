@@ -128,6 +128,12 @@ void _start(struct stivale2_struct *hdr)
 
   // demo fs
   fs_demo();
+  kprintf("\nFD 0: ");
+  fs_read(0);
+  kprintf("\n");
+  fs_delete(0);
+  fs_read(0);
+  kprintf("\n");
 
   // Pick an arbitrary location and size for the user-mode stack
   uintptr_t user_stack = 0x70000000000;

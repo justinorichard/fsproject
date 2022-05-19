@@ -174,14 +174,24 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
         return SYS_mmap((void *)arg0, (size_t)arg1, (int)arg2, (int)arg3,
                         (int)arg4, (uint64_t)arg5);
     case SYS_EXEC:
-        return SYS_exec((char *)arg0, (char*)arg1);
+        return SYS_exec((char *)arg0);
     case SYS_EXIT:
-        kprintf("test\n");
         return SYS_exit();
+
+    case SYS_FS_OPEN:
+        return SYS_fs_open(arg0);
+    case SYS_FS_WRITE:
+        return SYS_fs_write(arg0, arg1, arg2);
+    case SYS_FS_WRITE_AT:
+        return SYS_fs_write_at(arg0, arg1, arg2, arg3);
     case SYS_FS_APPEND:
         return SYS_fs_append((int)arg0, (uint8_t *)arg1, (size_t)arg2);
     case SYS_FS_READ:
         return SYS_fs_read((int)arg0);
+    case SYS_FS_DELETE:
+        return SYS_fs_delete(arg0);
+    case SYS_FS_RENAME:
+        return SYS_fs_rename(arg0, arg1);
     }
     return 123;
 }
@@ -245,6 +255,18 @@ long SYS_write(int file_descriptor, char *buffer, int length)
     return length;
 }
 
+long SYS_fs_open(const char* file_name){
+    fs_open(file_name);
+}
+
+long SYS_fs_write(int fd, uint8_t* buf, size_t size){
+    fs_write(fd, buf, size);
+}
+
+long SYS_fs_write_at(int fd, size_t index, uint8_t* buff, size_t size){
+    fs_write_at( fd, index, buff, size);
+}
+
 long SYS_fs_append(int fd, uint8_t *buf, size_t size) {
     fs_append(fd, buf, size);
 }
@@ -252,6 +274,16 @@ long SYS_fs_append(int fd, uint8_t *buf, size_t size) {
 long SYS_fs_read(int fd) {
     fs_read(fd);
 }
+
+long SYS_fs_delete(int fd){
+    fs_delete(fd);
+}
+
+long SYS_fs_rename(const char* oldpath, const char* newpath){
+    fs_rename(oldpath, newpath);
+}
+
+
 
 // Change the null stuff to where mmap is
 uintptr_t mem_start = MMAP_MEM_START;
@@ -317,12 +349,8 @@ long SYS_mmap(void *addr, size_t length, int prot, int flags,
     return (long)addr;
 }
 
-long SYS_exec(char *module, const char* argument)
+long SYS_exec(char *module)
 {
-    char args[512];
-    if(argument != NULL){
-        strcpy(args, argument);
-    }
 
     char kernel_mod[MOD_BUF_LEN];
     strcpy(kernel_mod, module);
@@ -334,19 +362,8 @@ long SYS_exec(char *module, const char* argument)
 
     entry_fn_t *func = (entry_fn_t *)load_module(hdr_global, kernel_mod);
 
-    uintptr_t user_stack = 0x70000000000;
-    size_t user_stack_size = 8 * 0x1000;
-
-    for (uintptr_t p = user_stack; p < user_stack + user_stack_size; p += 0x1000)
-    {
-        vm_map(read_cr3() & 0xFFFFFFFFFFFFF000, p, true, true, false);
-    }
-    
-    usermode_entry(
-        USER_DATA_SELECTOR | 0x3,
-        user_stack + user_stack_size - 8,
-        USER_CODE_SELECTOR | 0x3,
-        func);
+    func();
+    return 1;
 }
 
 long SYS_exit()
