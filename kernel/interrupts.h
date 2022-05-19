@@ -45,10 +45,10 @@ long SYS_mmap(void *addr, size_t length, int prot, int flags,
 long SYS_exec(char *module);
 long SYS_exit();
 
-long SYS_fs_open(const char* file_name);
-long SYS_fs_write(int fd, uint8_t* buf, size_t size);
-long SYS_fs_write_at(int fd, size_t index, uint8_t* buff, size_t size);
-long SYS_fs_append(int fd, uint8_t *buf, size_t size);
-long SYS_fs_read(int fd);
-long SYS_fs_delete(int fd);
-long SYS_fs_rename(const char* oldpath, const char* newpath);
+int SYS_fs_open(const char* file_name);
+bool SYS_fs_write(int fd, uint8_t* buf, size_t size);
+bool SYS_fs_write_at(int fd, size_t index, uint8_t* buff, size_t size);
+bool SYS_fs_append(int fd, uint8_t *buf, size_t size);
+void SYS_fs_read(int fd);
+void SYS_fs_delete(int fd);
+void SYS_fs_rename(const char* oldpath, const char* newpath);

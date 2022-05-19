@@ -141,8 +141,10 @@ bool fs_append(int fd, uint8_t *buf, size_t size) {
 
 void fs_read(int fd) {
     file_entry_t *entry = find_fd(fd);
-    if(entry == NULL)
+    if(entry == NULL){
+        kprintf("WARNING: The file you are trying to read does not exist\n");
         return;
+    }
     size_t total_size = entry->file_size;
     data_block_t *curr_block = &blocks[entry->start_index];
     for (;;) {
@@ -161,7 +163,10 @@ void fs_read(int fd) {
 
 void fs_delete(int fd) {
     file_entry_t *entry = find_fd(fd);
-
+    if(entry == NULL){
+        kprintf("WARNING: The file you are trying to delete does not exist\n");
+        return;
+    }
     // first block
     data_block_t *curr_block = &blocks[entry->start_index];
     node_t *curr_node;

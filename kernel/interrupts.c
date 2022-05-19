@@ -178,6 +178,7 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
     case SYS_EXIT:
         return SYS_exit();
 
+    // FS System Calls
     case SYS_FS_OPEN:
         return SYS_fs_open(arg0);
     case SYS_FS_WRITE:
@@ -187,11 +188,14 @@ int64_t syscall_handler(uint64_t nr, uint64_t arg0, uint64_t arg1, uint64_t arg2
     case SYS_FS_APPEND:
         return SYS_fs_append((int)arg0, (uint8_t *)arg1, (size_t)arg2);
     case SYS_FS_READ:
-        return SYS_fs_read((int)arg0);
+        SYS_fs_read(arg0);
+        break;
     case SYS_FS_DELETE:
-        return SYS_fs_delete(arg0);
+        SYS_fs_delete(arg0);
+        break;
     case SYS_FS_RENAME:
-        return SYS_fs_rename(arg0, arg1);
+        SYS_fs_rename(arg0, arg1);
+        break;
     }
     return 123;
 }
@@ -255,31 +259,31 @@ long SYS_write(int file_descriptor, char *buffer, int length)
     return length;
 }
 
-long SYS_fs_open(const char* file_name){
-    fs_open(file_name);
+int SYS_fs_open(const char* file_name){
+    return fs_open(file_name);
 }
 
-long SYS_fs_write(int fd, uint8_t* buf, size_t size){
-    fs_write(fd, buf, size);
+bool SYS_fs_write(int fd, uint8_t* buf, size_t size){
+    return fs_write(fd, buf, size);
 }
 
-long SYS_fs_write_at(int fd, size_t index, uint8_t* buff, size_t size){
-    fs_write_at( fd, index, buff, size);
+bool SYS_fs_write_at(int fd, size_t index, uint8_t* buff, size_t size){
+    return fs_write_at( fd, index, buff, size);
 }
 
-long SYS_fs_append(int fd, uint8_t *buf, size_t size) {
-    fs_append(fd, buf, size);
+bool SYS_fs_append(int fd, uint8_t *buf, size_t size) {
+    return fs_append(fd, buf, size);
 }
 
-long SYS_fs_read(int fd) {
+void SYS_fs_read(int fd) {
     fs_read(fd);
 }
 
-long SYS_fs_delete(int fd){
+void SYS_fs_delete(int fd){
     fs_delete(fd);
 }
 
-long SYS_fs_rename(const char* oldpath, const char* newpath){
+void SYS_fs_rename(const char* oldpath, const char* newpath){
     fs_rename(oldpath, newpath);
 }
 

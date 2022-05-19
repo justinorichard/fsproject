@@ -17,5 +17,6 @@
     "chrono": "c",
     "unordered_map": "c",
     "fs.h": "c"
-  }
+  },
+  "C_Cpp.errorSquiggles": "Disabled"
 }
